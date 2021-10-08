@@ -1,15 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Horizontal Stacked Bar Chart</title>
+    <title>Horizontal Stacked Line Chart</title>
     <script src="../libs/d3/d3.min.js"></script>
 
-</head>
-<body>
-<div style="width: 80%"></div>
-<script>
+    <style>
+        h3 {
+            font-family: Helvetica;
+        }
 
-</script>
+        .line1 {
+            fill: lightblue;
+            stroke-width: 1px;
+            stroke: steelblue;
+            fill-opacity: 20%;
+        }
+
+        .line2 {
+            fill: lightgreen;
+            stroke-width: 1px;
+            stroke: lightseagreen;
+            fill-opacity: 20%;
+        }
+
+        .line3 {
+            fill: lightgrey;
+            stroke-width: 1px;
+            stroke: darkgrey;
+            fill-opacity: 20%;
+        }
+
+        .line4 {
+            fill: pink;
+            stroke-width: 1px;
+            stroke: fuchsia;
+            fill-opacity: 20%;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h3 style="margin-left: auto;">Horizontal Stacked Line Charts</h3>
+    <div id="container" style="margin-left: auto; margin-top: auto;"></div>
+    <script>
+        let svg = d3.selectAll('#container')
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', '80vh')
+            .attr('viewBox', '0 0 1000 800')
+            .style('background-color', '#f5f3f3');
+        let margins = 50;
+        let width = 1000 - 1 * margins;
+        let height = 800 - 1 * margins;
+
+        const loadData = d3.csv("./data_sample.csv",
+            function (d) {
+                return {
+                    date: new Date(d.date),
+                    estimatedCost: Number(d.EstimatedCost),
+                    rawMaterial: Number(d.RawMaterial),
+                    workmanship: Number(d.Workmanship),
+                    yearlyStorage: Number(d.YearlyStorage)
+                }
+            });
+
+        loadData.then(data => {
+
+            let x = d3.scaleTime()
+                .domain(d3.extent(data, function (d) {
+                    return d.date;
+                }))
+                .range([margins, width]);
+
+            let y = d3.scaleLinear()
+                .domain([0, d3.max(data, function (d) {
+                    return d.estimatedCost;
+                })])
+                .range([height, margins]);
+
+            let line1 = d3.line()
+                .x(function (d) {
+                    return x(d.date);
+                })
+                .y(function (d) {
+                    return y(d.estimatedCost);
+                });
+
+            let line2 = d3.line()
+                .x(function (d) {
+                    return x(d.date);
+                })
+                .y(function (d) {
+                    return y(d.rawMaterial);
+                });
+
+            let line3 = d3.line()
+                .x(function (d) {
+                    return x(d.date);
+                })
+                .y(function (d) {
+                    return y(d.workmanship);
+                });
+
+            let line4 = d3.line()
+                .x(function (d) {
+                    return x(d.date);
+                })
+                .y(function (d) {
+                    return y(d.yearlyStorage);
+                });
+
+            svg.append("path")
+                .data([data])
+                .attr("class", "line1")
+                .attr("d", line1);
+
+            svg.append("path")
+                .data([data])
+                .attr("class", "line2")
+                .attr("d", line2);
+
+            svg.append("path")
+                .data([data])
+                .attr("class", "line3")
+                .attr("d", line3);
+
+            svg.append("path")
+                .data([data])
+                .attr("class", "line4")
+                .attr("d", line4);
+
+
+            svg.append("g")
+                .attr("transform", "translate(" + '0' + "," + height + ")")
+                .call(d3.axisBottom(x));
+
+            svg.append("g")
+                .attr("transform", "translate(" + margins + "," + '0' + ")")
+                .call(d3.axisLeft(y).ticks(10));
+        });
+    </script>
 </body>
+
 </html>

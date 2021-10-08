@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="libs/d3/d3.min.js"></script>
+</head>
+
+<body>
+    <div id="container" style="width: 100%">
+        <svg width="600" height="400" style="background-color:lavender">
+
+        </svg>
+
+    </div>
+    <script>
+        let svg = d3.selectAll('svg')
+        d3.csv("./Exercise/data_sample.csv", d3.autoType)
+            .then(
+                function (data) {
+                    console.log(data)
+                    let max_storage = d3.max(d3.map(data, function (d) {
+                        return d.YearlyStorage
+                    }))
+                    let max_Workmanship = d3.max(d3.map(data, function (d) {
+                        return d.Workmanship
+                    }))
+                    let max = d3.max([max_storage, max_Workmanship])
+
+                    console.log(max)
+                    let date_min_max = d3.extent(data, function (d) {
+                        return d.date
+                    })
+                    console.log(date_min_max)
+                    let scaleDates = d3.scaleTime().domain(date_min_max).range([50, 550])
+                    let scaleY = d3.scaleLinear().domain([0, max]).range([370, 20])
+                    let yearlyStLine = d3.line()
+                        .x(function (d) {
+                            return scaleDates(d.date);
+                        })
+                        .y(function (d) {
+                            return scaleY(d.YearlyStorage);
+                        })
+                    let EstimatedCostLine = d3.line()
+                        .x(function (d) {
+                            return scaleDates(d.date);
+                        })
+                        .y(function (d) {
+                            return scaleY(d.Workmanship);
+                        })
+
+                    svg.append('path')
+                        .data([data])
+                        .attr("d", yearlyStLine)
+                        .style('fill', 'none')
+                        .style("stroke", "Blue")
+                        .style("stroke-width", "2px")
+                    svg.append('path')
+                        .data([data])
+                        .attr("d", EstimatedCostLine)
+                        .style('fill', 'none')
+                        .style("stroke", "Red")
+                        .style("stroke-width", "2px")
+                    let xaxis = d3.axisBottom().scale(scaleDates)
+                    svg.append("g")
+                        .attr("transform", "translate(0,370)")
+                        .call(xaxis)
+                    svg.append("g")
+                        .attr("transform", "translate(30,0)")
+                        .call(d3.axisLeft(scaleY).ticks(10))
+                }
+            )
+    </script>
+</body>
+
+</html>
